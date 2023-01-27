@@ -64,8 +64,6 @@ async function main() {
       if (envVarsToToggle.some((envVar) => line.startsWith(envVar))) {
         // We could optimise here by removing this key from the envVarsToToggle Array?
         let [key, val] = line.split(/\=(.*)/);
-        console.log(line, key, val, line.split("=", 1));
-        
         linesToCommentOut.push({
           line: idx,
           lineInFile: idx + 1,
