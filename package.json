@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Toggle between your most used environment variables.",
   "main": "index.js",
+  "type":"module",
   "bin": {
     "cli-env-toggler": "./dist/main.js"
   },

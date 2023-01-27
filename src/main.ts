@@ -18,8 +18,8 @@ async function main() {
   /* Program config using Commander.js */
   program
     .version(version)
-    .description("Toggle between your most used environment variables.")
-    .argument("<group>", "The name of the group to toggle, keyed in the .env file like: '###-A' for group A.")
+    .description("Toggle between your most used environment variables by keying them.")
+    .argument("<groupName>", "The name of the group to toggle, keyed in the .env file like: '###-A' for group A.")
     .option("-l, --list-only", "List the changes and do not proceed")
     .option(
       "-n, --name  <value>",
@@ -33,34 +33,67 @@ async function main() {
     .showHelpAfterError("Add -h for help.")
     .parse();
 
-  program.parse();
-
   /* Show help if no arguments are passed */
   if (!process.argv.slice(2).length) {
     program.outputHelp();
   }
 
   const options = program.opts();
-  console.log(options);
-
-  const pathToEnv = computePathToEnv(options);
   const listOnly = options.listOnly ?? false;
-  const groupName = options.groupName;
-
+  const groupName = program.args[0];
+  const pathToEnv = computePathToEnv(options);
   handle();
 
   /* Functions */
 
   async function handle() {
     const envFileContents = await getEnvFile();
-    const envByLine = envFileContents.split("\n");
-    envByLine.forEach((val, idx) => {
-      console.log(envFileContents.match(/^###.*/));
+    const envByLine = envFileContents.split("\n"); // Multiline env variables won't like this - future dev?
+    const regexString = "^###-" + escapeRegExp(groupName) + `\\s*(.*)=(.*)$`;
+
+    const envVarsToToggle: string[] = Array.from(envFileContents.matchAll(new RegExp(regexString, "gm")), (x) => x[1]);
+
+    // Go through each line and check whether it qualifies for the toggle
+    const matchedLines: EnvLine[] = [];
+    const linesToCommentOut: EnvLine[] = [];
+
+    envByLine.forEach((variable: string, idx: number) => {
+      let line = variable.trim();
+
+      // First check whether it is one of the variables, but in its uncommented out form:
+      if (envVarsToToggle.some((envVar) => line.startsWith(envVar))) {
+        // We could optimise here by removing this key from the envVarsToToggle Array?
+        let [key, val] = line.split(/\=(.*)/);
+        console.log(line, key, val, line.split("=", 1));
+        
+        linesToCommentOut.push({
+          line: idx,
+          lineInFile: idx + 1,
+          envKey: key,
+          envVal: val,
+        });
+        // if we have found a match here, it doesn't begin with ###.
+        return;
+      }
+
+      // Check whether this line is a match to be un-commented out.
+      let match = line.match(new RegExp(regexString));
+      if (match) {
+        matchedLines.push({
+          line: idx,
+          lineInFile: idx + 1,
+          envKey: match[1],
+          envVal: match[2],
+        });
+      }
     });
 
-    envByLine.push("test");
-    let newEnvFile = envByLine.join("\n");
-    await fs.writeFile(pathToEnv, newEnvFile);
+    console.log(chalk.green("Toggle On"));
+    console.table(matchedLines, ["lineInFile", "envKey", "envVal"]);
+    console.log(chalk.red("Toggle Out:"));
+    console.table(linesToCommentOut, ["lineInFile", "envKey", "envVal"]);
+
+    console.log("TODO: Write to file if -l was not passed here!");
   }
 
   function computePathToEnv(options: OptionValues) {
@@ -78,4 +111,15 @@ async function main() {
       process.exit(1);
     }
   }
+
+  function escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+  }
+}
+
+interface EnvLine {
+  line: number;
+  lineInFile: number;
+  envKey: string;
+  envVal: string;
 }
