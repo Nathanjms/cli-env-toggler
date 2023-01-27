@@ -8,7 +8,7 @@ Ensure you have Node installed, then run
 npx cli-env-toggler [GROUP]
 ```
 
-or for options, run
+or for more detailed options, run
 
 ```
 npx cli-env-toggler -h
