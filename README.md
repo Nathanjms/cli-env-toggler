@@ -1,6 +1,8 @@
 # CLI Env Toggler
 
-Idea: Finds any ENV variables beginning with '###' and enables them, inverting any that already exist to have '###' at the front.
+WIP
+
+Idea: Finds any ENV variables beginning with '###-{GROUP_NAME}' and enables them, inverting any that already are currently set to the '###-{GROUP_NAME}' state.
 
 ## Dev
 
