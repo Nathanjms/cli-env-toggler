@@ -4,12 +4,13 @@ import chalk from "chalk";
 import fs from "fs/promises";
 import { OptionValues, program } from "commander";
 import figlet from "figlet";
+import inquirer from "inquirer";
 
 main();
 
 async function main() {
   /* Global Constants */
-  const version = "0.0.4";
+  const version = "0.0.5";
   const currentDir = process.cwd();
 
   /* Nice header when init */
@@ -30,6 +31,10 @@ async function main() {
       "-p, --path  <value>",
       "The path to the .env file, defaults to the current directory. Note: Overrides the 'name' parameter when passes."
     )
+    .option(
+      "-y, --yes-to-all",
+      "Skip the question asking you to confirm you are happy for the toggling to go ahead."
+    )
     .showHelpAfterError("Add -h for help.")
     .parse();
 
@@ -40,6 +45,7 @@ async function main() {
 
   const options = program.opts();
   const listOnly = options.listOnly ?? false;
+  const skipConfirmation = options.yesToAll ?? false;
   const groupName = program.args[0];
   const pathToEnv = computePathToEnv(options);
   handle();
@@ -89,16 +95,26 @@ async function main() {
     outputTogglesToTerminal(matchedLines, linesToCommentOut);
 
     if (!listOnly) {
-      matchedLines.forEach((l) => {
-        envByLine[l.line] = envByLine[l.line].replace(new RegExp("^###-" + escapeRegExp(groupName) + "\\s*"), ""); // Why is a new space being added each time?
-      });
-      linesToCommentOut.forEach((l) => {
-        envByLine[l.line] = "###-" + groupName + " " + envByLine[l.line];
-      });
-      await fs.writeFile(pathToEnv, envByLine.join("\n"));
-    }
+      let decision = skipConfirmation
+        ? true
+        : await inquirer.prompt({
+            type: "confirm",
+            default: "true",
+            message: "Do you wish to proceed?",
+            name: "decision"
+          });
 
-    console.log(chalk.blueBright("Done!"));
+      if (decision) {
+        matchedLines.forEach((l) => {
+          envByLine[l.line] = envByLine[l.line].replace(new RegExp("^###-" + escapeRegExp(groupName) + "\\s*"), ""); // Why is a new space being added each time?
+        });
+        linesToCommentOut.forEach((l) => {
+          envByLine[l.line] = "###-" + groupName + " " + envByLine[l.line];
+        });
+        await fs.writeFile(pathToEnv, envByLine.join("\n"));
+        console.log(chalk.blueBright("Done!"));
+      }
+    }
   }
 
   function outputTogglesToTerminal(matchedLines: EnvLine[], linesToCommentOut: EnvLine[]) {
