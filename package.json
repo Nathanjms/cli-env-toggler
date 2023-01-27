@@ -1,6 +1,6 @@
 {
   "name": "cli-env-toggler",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Toggle between your most used environment variables.",
   "main": "index.js",
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Nathan James <nathan@nathanjms.co.uk>",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.2.0",
