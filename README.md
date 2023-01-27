@@ -1,8 +1,18 @@
 # CLI Env Toggler
 
-WIP
+## Usage
 
-Idea: Finds any ENV variables beginning with '###-{GROUP_NAME}' and enables them, inverting any that already are currently set to the '###-{GROUP_NAME}' state.
+Ensure you have Node installed, then run
+
+```
+npx cli-env-toggler [GROUP]
+```
+
+or for options, run
+
+```
+npx cli-env-toggler -h
+```
 
 ## Example(s)
 
@@ -56,14 +66,6 @@ DB_PASSWORD=
 ###-DB DB_PASSWORD=password
 ```
 
-
-## Usage
-
-Ensure you have Node installed, then run
-
-```
-npx cli-env-toggler
-```
 ## Dev
 
 ```
