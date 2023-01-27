@@ -86,12 +86,23 @@ async function main() {
       }
     });
 
-    console.log(chalk.green("Toggle On"));
+    console.log(chalk.green("The following will be toggled On:"));
     console.table(matchedLines, ["lineInFile", "envKey", "envVal"]);
-    console.log(chalk.red("Toggle Out:"));
+    console.log(chalk.red("The following will be toggled Off:"));
     console.table(linesToCommentOut, ["lineInFile", "envKey", "envVal"]);
 
-    console.log("TODO: Write to file if -l was not passed here!");
+    if (!listOnly) {
+      matchedLines.forEach((l) => {
+        envByLine[l.line] = envByLine[l.line].replace(new RegExp("^###-\\s*" + escapeRegExp(groupName)), ""); // Why is a new space being added each time?
+      });
+      linesToCommentOut.forEach((l) => {
+        envByLine[l.line] = "###-" + groupName + " " + envByLine[l.line];
+      });
+    }
+
+    await fs.writeFile(pathToEnv, envByLine.join("\n"));
+
+    console.log(chalk.blueBright("Done!"));
   }
 
   function computePathToEnv(options: OptionValues) {
