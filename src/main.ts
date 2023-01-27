@@ -20,7 +20,10 @@ async function main() {
   program
     .version(version)
     .description("Toggle between your most used environment variables by keying them.")
-    .argument("<groupName>", "The name of the group to toggle, keyed in the .env file like: '###-A' for group A.")
+    .option(
+      "-g, --group-name <value>",
+      "The name of the group to toggle, keyed in the .env file like: '###-A' for group A."
+    )
     .option("-l, --list-only", "List the changes and do not proceed")
     .option(
       "-n, --name  <value>",
@@ -31,22 +34,13 @@ async function main() {
       "-p, --path  <value>",
       "The path to the .env file, defaults to the current directory. Note: Overrides the 'name' parameter when passes."
     )
-    .option(
-      "-y, --yes-to-all",
-      "Skip the question asking you to confirm you are happy for the toggling to go ahead."
-    )
+    .option("-y, --yes-to-all", "Skip the question asking you to confirm you are happy for the toggling to go ahead.")
     .showHelpAfterError("Add -h for help.")
     .parse();
-
-  /* Show help if no arguments are passed */
-  if (!process.argv.slice(2).length) {
-    program.outputHelp();
-  }
 
   const options = program.opts();
   const listOnly = options.listOnly ?? false;
   const skipConfirmation = options.yesToAll ?? false;
-  const groupName = program.args[0];
   const pathToEnv = computePathToEnv(options);
   handle();
 
@@ -54,7 +48,10 @@ async function main() {
 
   async function handle() {
     const envFileContents = await getEnvFile();
+    const groupName = await computeGroupName(envFileContents);
+
     const envByLine = envFileContents.split("\n"); // Multiline env variables won't like this - future dev?
+
     const regexString = "^###-" + escapeRegExp(groupName) + `\\s*(.*)=(.*)$`;
 
     const envVarsToToggle: string[] = Array.from(envFileContents.matchAll(new RegExp(regexString, "gm")), (x) => x[1]);
@@ -101,7 +98,7 @@ async function main() {
             type: "confirm",
             default: "true",
             message: "Do you wish to proceed?",
-            name: "decision"
+            name: "decision",
           });
 
       if (decision) {
@@ -115,6 +112,45 @@ async function main() {
         console.log(chalk.blueBright("Done!"));
       }
     }
+  }
+
+  async function computeGroupName(envFileContents: string) {
+    if (options.groupName) {
+      return options.groupName;
+    }
+
+    // Find all valid group names
+    console.log("Attempting to find group names from env...");
+
+    const groupNames: string[] = Array.from(envFileContents.matchAll(/^###-(\w*\d*)\s*/gm), (x) => x[1]);
+    const choices: {
+      name: string;
+      value: string;
+    }[] = [];
+
+    // Format choices and also remove duplicates
+    for (const name of groupNames) {
+      if (!choices.some((c) => c.name == name)) {
+        choices.push({
+          name: name,
+          value: name,
+        });
+      }
+    }
+
+    // Make unique and need to give it a name and val options
+
+    if (groupNames.length === 0) {
+      console.log(chalk.red("No Group Names could be found"));
+      process.exit(1);
+    }
+    let choice = await inquirer.prompt({
+      type: "list",
+      choices: choices,
+      name: "group",
+      message: "Select a group",
+    });
+    return choice.group;
   }
 
   function outputTogglesToTerminal(matchedLines: EnvLine[], linesToCommentOut: EnvLine[]) {
