@@ -1,6 +1,6 @@
 {
   "name": "cli-env-toggler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Toggle between your most used environment variables.",
   "main": "index.js",
   "type": "module",
