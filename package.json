@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "description": "Toggle between your most used environment variables.",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "bin": {
     "cli-env-toggler": "./dist/main.js"
   },
+  "files": [
+    "package.json",
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
