@@ -1,5 +1,9 @@
 # CLI Env Toggler
 
+## Screenshot
+
+![Example_Gif](https://user-images.githubusercontent.com/64075030/215582943-eb302484-42fb-4574-84c8-70674d54bedb.gif)
+
 ## Usage
 
 Ensure you have Node installed, then run
@@ -50,7 +54,7 @@ DB_PASSWORD=password
 
 #### Step 2 - Run the toggle for the group 'DB'
 ```bash
-npx cli-env-toggler db
+npx cli-env-toggler DB
 ```
 
 And that's it! Your environment variables will now look like the following:
@@ -74,5 +78,5 @@ npm run build && npm i -g
 
 Then can do
 ```
-npx env-toggler
+npx cli-env-toggler
 ```
