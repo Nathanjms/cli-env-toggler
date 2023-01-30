@@ -1,5 +1,10 @@
 # CLI Env Toggler
 
+<p align="center">
+  <img src="https://img.shields.io/npm/v/cli-env-toggler" />
+  <img src="https://img.shields.io/npm/dt/cli-env-toggler" />
+</p>
+
 ## Screenshot
 
 ![Example_Gif](https://user-images.githubusercontent.com/64075030/215582943-eb302484-42fb-4574-84c8-70674d54bedb.gif)
