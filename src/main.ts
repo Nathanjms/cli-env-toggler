@@ -10,7 +10,7 @@ main();
 
 async function main() {
   /* Global Constants */
-  const version = "0.0.5";
+  const version = "0.0.6";
   const currentDir = process.cwd();
 
   /* Nice header when init */
